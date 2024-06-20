@@ -7,6 +7,7 @@ export type Workout = {
 }
 
 export type RepRecord = {
+  id?: number
   workoutid: number
   count: number
   added_on: number

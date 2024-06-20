@@ -1,21 +1,13 @@
-'use client'
 import LogRepsButton from "@/components/LogRepsButton"
 import { Workout } from "@/models"
 import React, { useState, useEffect } from "react"
 import { getWorkouts } from "@/actions"
 import AddWorkoutButton from "@/components/AddWorkoutButton"
 
-const IndexPage = () => {
-  const [workouts, setWorkouts] = useState<Workout[]>([])
+export const fetchCache = 'force-no-store';
 
-  useEffect(() => {
-    loadWorkouts()
-  }, [])
-
-  async function loadWorkouts() {
-    const w = await getWorkouts()
-    setWorkouts(w)
-  }
+async function IndexPage() {
+  const workouts = await getWorkouts()
 
   return (
     <div className="flex flex-col p-4">
@@ -24,7 +16,7 @@ const IndexPage = () => {
           <LogRepsButton key={idx} workout={el} />
         ))}
         <hr />
-        <AddWorkoutButton onWorkoutAdded={loadWorkouts} />
+        <AddWorkoutButton />
       </div>
     </div>
   )

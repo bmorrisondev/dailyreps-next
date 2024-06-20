@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from 'react'
 import { Button } from './ui/button'
 import {
@@ -11,11 +12,7 @@ import {
 import { addWorkout } from '@/actions'
 import { Input } from "@/components/ui/input"
 
-type Props = {
-  onWorkoutAdded: () => void
-}
-
-function AddWorkoutButton({ onWorkoutAdded }: Props) {
+function AddWorkoutButton() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [workoutName, setWorkoutName] = useState("")
   const [targetReps, setTargetReps] = useState(100)
@@ -27,7 +24,7 @@ function AddWorkoutButton({ onWorkoutAdded }: Props) {
   async function save() {
     await addWorkout(workoutName, targetReps)
     setIsModalOpen(false)
-    onWorkoutAdded()
+    window.location.reload()
   }
 
   return (

@@ -50,3 +50,56 @@ export async function addWorkout(name: string, targetreps: number) {
   }
   await sql`INSERT INTO workouts (name, targetreps, userid) VALUES (${name}, ${targetreps}, ${userId})`;
 }
+
+export async function getWorkoutsForList(): Promise<Workout[]> {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error("User not found");
+  }
+
+  let workouts = await sql`SELECT * FROM workouts
+  WHERE userid = ${userId} and
+  (isarchived = false or isarchived is null)` as Workout[];
+
+  return workouts;
+}
+
+export async function getWorkout(workoutId: number) {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error("User not found");
+  }
+
+  let workout = await sql`SELECT * FROM workouts WHERE id = ${workoutId} and userid = ${userId}` as Workout[];
+  return workout[0];
+}
+
+export async function getRepsForWorkout(workoutId: number) {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error("User not found");
+  }
+
+  let reps = await sql`SELECT * FROM reps WHERE workoutid = ${workoutId} and userid = ${userId}` as RepRecord[];
+  reps.sort((a: RepRecord, b: RepRecord) => b.added_on - a.added_on);
+  return reps;
+}
+
+export async function deleteReps(repsId: number) {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error("User not found");
+  }
+
+  await sql`DELETE FROM reps WHERE id = ${repsId} and userid = ${userId}`;
+}
+
+export async function deleteWorkout(workoutId: number) {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error("User not found");
+  }
+
+  await sql`DELETE FROM workouts WHERE id = ${workoutId} and userid = ${userId}`;
+  await sql`DELETE FROM reps WHERE workoutid = ${workoutId} and userid = ${userId}`;
+}

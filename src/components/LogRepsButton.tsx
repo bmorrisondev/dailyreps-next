@@ -1,3 +1,4 @@
+'use client'
 import { RepRecord, Workout } from '@/models'
 import React, { useEffect, useState } from 'react'
 import { Button } from './ui/button'
@@ -23,7 +24,6 @@ function LogRepsButton({ workout }: Props) {
   const [currentReps, setCurrentReps] = useState(0)
 
   useEffect(() => {
-    console.log(workout)
     let count = 0
     if (workout.reps && workout.reps.length > 0) {
       workout?.reps?.forEach((r: RepRecord) => (count += r.count))
