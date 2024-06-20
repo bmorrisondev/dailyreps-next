@@ -1,47 +1,36 @@
 'use server'
 
 import { auth } from '@clerk/nextjs/server';
-import { RepRecord, Workout } from './models'
-import postgres from "postgres";
+import { RepRecord, Workout } from './models';
+import { neon } from "@neondatabase/serverless";
 
-let {
-  PGHOST,
-  PGDATABASE,
-  PGUSER,
-  PGPASSWORD,
-  ENDPOINT_ID
-} = process.env;
-
-const sql = postgres({
-  host: PGHOST,
-  database: PGDATABASE,
-  username: PGUSER,
-  password: PGPASSWORD,
-  port: 5432,
-  ssl: 'require'
-});
+// Initialize the neon client with the DATABASE_URL
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL is missing");
+}
+const sql = neon(process.env.DATABASE_URL);
 
 export async function getWorkouts(): Promise<Workout[]> {
-  const { userId } = auth()
-  if(!userId) {
+  const { userId } = auth();
+  if (!userId) {
     throw new Error("User not found");
   }
 
   let workouts = await sql`SELECT * FROM workouts
   WHERE userid = ${userId} and
-  (isarchived = false or isarchived is null)` as Workout[]
-  let midnight = new Date().setHours(0, 0, 0, 0)
-  let reps = await sql`SELECT * FROM reps where added_on > ${midnight} and userid = ${userId}` as RepRecord[]
+  (isarchived = false or isarchived is null)` as Workout[];
+  let midnight = new Date().setHours(0, 0, 0, 0);
+  let reps = await sql`SELECT * FROM reps where added_on > ${midnight} and userid = ${userId}` as RepRecord[];
 
   workouts.forEach((w: Workout) => {
-    w.reps = reps.filter((r: RepRecord) => r.workoutid === w.id)
-  })
-  return workouts
+    w.reps = reps.filter((r: RepRecord) => r.workoutid === w.id);
+  });
+  return workouts;
 }
 
 export async function addRepsToWorkout(workoutId: number, count: number) {
-  const { userId } = auth()
-  if(!userId) {
+  const { userId } = auth();
+  if (!userId) {
     throw new Error("User not found");
   }
 
@@ -49,15 +38,15 @@ export async function addRepsToWorkout(workoutId: number, count: number) {
     workoutid: workoutId,
     count,
     added_on: new Date().getTime(),
-  }
+  };
   await sql`INSERT INTO reps (workoutid, count, added_on, userid)
-    VALUES (${newreps.workoutid}, ${newreps.count}, ${newreps.added_on}, ${userId})`
+    VALUES (${newreps.workoutid}, ${newreps.count}, ${newreps.added_on}, ${userId})`;
 }
 
 export async function addWorkout(name: string, targetreps: number) {
-  const { userId } = auth()
-  if(!userId) {
+  const { userId } = auth();
+  if (!userId) {
     throw new Error("User not found");
   }
-  await sql`INSERT INTO workouts (name, targetreps, userid) VALUES (${name}, ${targetreps}, ${userId})`
+  await sql`INSERT INTO workouts (name, targetreps, userid) VALUES (${name}, ${targetreps}, ${userId})`;
 }
