@@ -51,6 +51,14 @@ export async function addWorkout(name: string, targetreps: number) {
   await sql`INSERT INTO workouts (name, targetreps, userid) VALUES (${name}, ${targetreps}, ${userId})`;
 }
 
+export async function addTimedWorkout(name: string, targetreps: number) {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error("User not found");
+  }
+  await sql`INSERT INTO workouts (name, targetreps, userid, type) VALUES (${name}, ${targetreps}, ${userId}, 1)`;
+}
+
 export async function getWorkoutsForList(): Promise<Workout[]> {
   const { userId } = auth();
   if (!userId) {

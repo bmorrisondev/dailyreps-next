@@ -1,8 +1,9 @@
 import { getRepsForWorkout, getWorkout } from '@/actions'
-import { RepRecord } from '@/models'
+import { RepRecord, WorkoutTypeEnum } from '@/models'
 import React from 'react'
 import DeleteRepsButton from './DeleteRepsButton'
 import DeleteWorkoutButton from './DeleteWorkoutButton'
+import { secondsToTimestamp } from '@/utils'
 
 export const fetchCache = 'force-no-store';
 
@@ -15,7 +16,6 @@ async function Workout({ params }: { params: { id: string } }) {
   const repsOrganized: any = {}
   reps.forEach((r) => {
     let d = new Date(Number(r.added_on))
-    console.log(d)
     if(!repsOrganized[d.toLocaleDateString()]) {
       repsOrganized[d.toLocaleDateString()] = []
     }
@@ -38,7 +38,7 @@ async function Workout({ params }: { params: { id: string } }) {
               {repsOrganized[k].map((r: RepRecord) => (
                 <li key={r.id} className='mb-1 flex justify-between'>
                   <span>
-                    {r.count} at {new Date(Number(r.added_on)).toLocaleTimeString()}
+                    {wo.type === WorkoutTypeEnum.Count ? r.count : secondsToTimestamp(r.count)} at {new Date(Number(r.added_on)).toLocaleTimeString()}
                   </span>
                   <div>
                     <DeleteRepsButton workout={wo} reps={r} />
