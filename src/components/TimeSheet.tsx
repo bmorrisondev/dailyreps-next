@@ -1,7 +1,8 @@
 'use client'
-import React from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from './ui/button'
 import { secondsToTimestamp } from '@/utils'
+import { PauseIcon, PlayIcon, TimerResetIcon } from 'lucide-react'
 
 type Props = {
   repsBeingAdded: number
@@ -9,12 +10,41 @@ type Props = {
 }
 
 function TimeSheet({ repsBeingAdded, setRepsBeingAdded }: Props) {
+  const [isTimerActive, setIsTimerActive] = useState(false)
+  const intervalId = useRef<NodeJS.Timeout | null>(null);
+
+  const startInterval = useCallback(() => {
+    let newval = repsBeingAdded
+    intervalId.current = setInterval(() => {
+      newval++
+      setRepsBeingAdded(newval)
+    }, 1000);
+  }, [repsBeingAdded]);
+
+  function onTimerClicked() {
+    if(!isTimerActive) {
+      setIsTimerActive(true)
+      startInterval()
+    } else {
+      setIsTimerActive(false)
+      clearInterval(intervalId.current as NodeJS.Timeout);
+    }
+  }
+
   return (
     <>
-      <span className="col-span-2 font-bold text-4xl mb-2 flex justify-center">
+      <div className="col-span-2 font-bold text-4xl mb-2 flex justify-center items-center gap-4">
         {/* {repsBeingAdded < 60 ? '0' : Math.ceil(repsBeingAdded/60)}:{repsBeingAdded % 60 < 10 ? `0${repsBeingAdded % 60}` : repsBeingAdded % 60} */}
-        {secondsToTimestamp(repsBeingAdded)}
-      </span>
+        <Button variant='secondary' onClick={() => setRepsBeingAdded(1)}>
+          <TimerResetIcon />
+        </Button>
+        <span className="w-28 flex justify-center">
+          {secondsToTimestamp(repsBeingAdded)}
+        </span>
+        <Button variant='secondary' onClick={onTimerClicked}>
+          {isTimerActive ? <PauseIcon className='animate-pulse text-green-500' /> : <PlayIcon /> }
+        </Button>
+      </div>
       <Button
         variant='secondary'
         onClick={() => setRepsBeingAdded(repsBeingAdded - 1)}

@@ -1,6 +1,6 @@
 'use client'
 import { RepRecord, Workout, WorkoutTypeEnum } from '@/models'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from './ui/button'
 import {
   Dialog,
@@ -22,7 +22,7 @@ type Props = {
 
 function LogRepsButton({ workout }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [repsBeingAdded, setRepsBeingAdded] = useState(10)
+  const [repsBeingAdded, setRepsBeingAdded] = useState(0)
   const [currentReps, setCurrentReps] = useState(0)
   const [progressStr, setProgressStr] = useState('')
 
@@ -32,7 +32,6 @@ function LogRepsButton({ workout }: Props) {
       workout?.reps?.forEach((r: RepRecord) => (count += r.count))
     }
     setCurrentReps(count)
-
   }, [workout])
 
   useEffect(() => {
@@ -44,7 +43,11 @@ function LogRepsButton({ workout }: Props) {
   }, [currentReps])
 
   async function onOpenChange(open: boolean) {
-    setRepsBeingAdded(10)
+    if(workout.type === WorkoutTypeEnum.Count) {
+      setRepsBeingAdded(10)
+    } else {
+      setRepsBeingAdded(30)
+    }
     setIsModalOpen(open)
   }
 
